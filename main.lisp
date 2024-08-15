@@ -3,6 +3,8 @@
 
 (defun buttons()
   (with-ltk ()
+    (wm-title *tk* "Copy Umlaut")
+            
    (let* ((f (make-instance 'frame))
           (umlauts '(("Ä" "ä") ("Ö" "ö") ("Ü" "ü") ("Ë" "ë"))))
      
