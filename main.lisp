@@ -8,7 +8,6 @@
      
      (pack f)
 
-
      (dolist (row umlauts)
        (let ((row-frame (make-instance 'frame :master f))) 
          (dolist (char row)
@@ -16,7 +15,9 @@
                                         :master row-frame
                                         :text char
                                         :command (lambda ()
-                                                   (format t "~A 버튼이 클릭되었습니다!~&" char)))))
+                                                   (progn
+                                                      ;; Clipboard
+                                                      (format-wish "clipboard clear; clipboard append ~S" char))))))
              (pack button :side :left)))
          (pack row-frame :side :top)))
 
