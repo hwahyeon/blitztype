@@ -3,12 +3,12 @@
 
 (defun buttons()
   (with-ltk ()
-    (wm-title *tk* "Umlaut Buttons")
+    (wm-title *tk* "Umlaut & Eszett Copy")
 
     (let* ((f (make-instance 'frame))
            (info-label (make-instance 'label :master f :text "Click a button to copy")))
 
-      (dolist (row '(("Ä" "ä") ("Ö" "ö") ("Ü" "ü") ("Ë" "ë")))
+      (dolist (row '(("Ä" "ä") ("Ö" "ö") ("Ü" "ü") ("ẞ" "ß")))
         (let ((row-frame (make-instance 'frame :master f)))
           (dolist (char row)
             (let ((button (make-instance 'button
