@@ -1,6 +1,7 @@
 #include "gui.h"
 #include "keymap.h"
 #include "config.h"
+#include "resource.h"
 
 HWND hButtonToggle, hStatusText, hIssueLink, hInstructions;
 BOOL isKeymapActive = FALSE;
@@ -152,13 +153,17 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 void InitGUI(HINSTANCE hInstance, int nCmdShow)
 {
     hBackgroundBrush = CreateSolidBrush(RGB(24, 44, 85));
-    WNDCLASSW wc = {0};
+    WNDCLASSEXW wc = {0};
+    wc.cbSize = sizeof(WNDCLASSEXW);
     wc.lpfnWndProc = WindowProc;
     wc.hInstance = hInstance;
-    wc.hbrBackground = NULL;
     wc.lpszClassName = L"KeymapGUI";
+    wc.hIcon = LoadIconW(hInstance, MAKEINTRESOURCE(IDI_ICON1));
+    wc.hIconSm = LoadIconW(hInstance, MAKEINTRESOURCE(IDI_ICON1));
+    wc.hCursor = LoadCursorW(NULL, IDC_ARROW);
+    wc.hbrBackground = hBackgroundBrush;
 
-    RegisterClassW(&wc);
+    RegisterClassExW(&wc);
 
     HWND hwnd = CreateWindowExW(0, L"KeymapGUI", L"Quick Umlaut",
                                 WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
