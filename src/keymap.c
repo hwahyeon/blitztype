@@ -20,6 +20,13 @@ void SendUnicodeChar(wchar_t c) {
     SendInput(2, input, sizeof(INPUT));
 }
 
+void HandleUmlaut(wchar_t lower, wchar_t upper) {
+    if (GetAsyncKeyState(VK_SHIFT) & 0x8000)
+        SendUnicodeChar(upper);
+    else
+        SendUnicodeChar(lower);
+}
+
 // Keyboard hook procedure
 LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
     if (nCode >= 0 && wParam == WM_KEYDOWN) {
@@ -28,10 +35,10 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
         // Detect Ctrl + Alt combination
         if ((GetAsyncKeyState(VK_CONTROL) & 0x8000) && (GetAsyncKeyState(VK_MENU) & 0x8000)) {
             switch (kbd->vkCode) {
-                case 'A': SendUnicodeChar(GetAsyncKeyState(VK_SHIFT) & 0x8000 ? L'Ä' : L'ä'); return 1;
-                case 'O': SendUnicodeChar(GetAsyncKeyState(VK_SHIFT) & 0x8000 ? L'Ö' : L'ö'); return 1;
-                case 'U': SendUnicodeChar(GetAsyncKeyState(VK_SHIFT) & 0x8000 ? L'Ü' : L'ü'); return 1;
-                case 'S': SendUnicodeChar(GetAsyncKeyState(VK_SHIFT) & 0x8000 ? L'ẞ' : L'ß'); return 1;
+                case 'A': HandleUmlaut(L'ä', L'Ä'); return 1;
+                case 'O': HandleUmlaut(L'ö', L'Ö'); return 1;
+                case 'U': HandleUmlaut(L'ü', L'Ü'); return 1;
+                case 'S': HandleUmlaut(L'ß', L'ẞ'); return 1;
             }
         }
     }
