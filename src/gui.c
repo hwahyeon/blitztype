@@ -41,7 +41,9 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
         // Set font and text color (blue with underline)
         SendMessageW(hIssueLink, WM_SETFONT, (WPARAM)GetStockObject(DEFAULT_GUI_FONT), TRUE);
-        SetTextColor(GetDC(hIssueLink), RGB(0, 0, 255));
+        HDC hdc = GetDC(hIssueLink);
+        SetTextColor(hdc, RGB(0, 0, 255));
+        ReleaseDC(hIssueLink, hdc);
 
         break;
 
