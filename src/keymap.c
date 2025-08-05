@@ -41,6 +41,9 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
 // Start the keyboard mapping hook
 void StartKeymap() {
     hHook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardProc, NULL, 0);
+    if (!hHook) {
+        MessageBoxW(NULL, L"Failed to install keyboard hook.", L"Error", MB_ICONERROR);
+    }
 }
 
 // Stop the keyboard mapping hook
