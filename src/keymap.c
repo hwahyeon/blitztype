@@ -48,5 +48,8 @@ void StartKeymap() {
 
 // Stop the keyboard mapping hook
 void StopKeymap() {
-    UnhookWindowsHookEx(hHook);
+    if (hHook) {
+        UnhookWindowsHookEx(hHook);
+        hHook = NULL;
+    }
 }
