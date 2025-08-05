@@ -42,7 +42,8 @@ No need to change your keyboard layout or language settings.
 Requires GCC (MinGW) and `gdi32`:
 
 ```bash
-gcc src/main.c src/gui.c src/keymap.c -o build/app.exe -lgdi32 -municode -mwindows
+windres src/resource.rc -O coff -o build/resource.o
+gcc src/main.c src/gui.c src/keymap.c build/resource.o -o build/app.exe -lgdi32 -municode -mwindows
 ```
 
 Or use the included VS Code `tasks.json` for building and running.
