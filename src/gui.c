@@ -39,12 +39,10 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                                    50, 90, 200, 20, hwnd, (HMENU)ID_LINK_ISSUE,
                                    (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), NULL);
 
-        // Set font and text color (blue with underline)
+        // Set font
         SendMessageW(hIssueLink, WM_SETFONT, (WPARAM)GetStockObject(DEFAULT_GUI_FONT), TRUE);
-        HDC hdc = GetDC(hIssueLink);
-        SetTextColor(hdc, RGB(0, 0, 255));
-        ReleaseDC(hIssueLink, hdc);
 
+        // Old SetTextColor code removed (was not effective without WM_CTLCOLORSTATIC)
         break;
 
     case WM_COMMAND:
@@ -68,6 +66,20 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             break;
         }
         break;
+
+    case WM_CTLCOLORSTATIC:
+    {
+        HDC hdcStatic = (HDC)wParam;
+        HWND hCtrl = (HWND)lParam;
+
+        if (hCtrl == hIssueLink)
+        {
+            SetTextColor(hdcStatic, RGB(0, 0, 255));
+            SetBkMode(hdcStatic, TRANSPARENT);
+            return (LRESULT)GetStockObject(NULL_BRUSH);
+        }
+        break;
+    }
 
     case WM_CLOSE:
         StopKeymap();
