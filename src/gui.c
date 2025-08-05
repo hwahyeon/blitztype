@@ -2,69 +2,98 @@
 #include "keymap.h"
 #include "config.h"
 
-HWND hButtonToggle, hStatusText, hIssueLink, hInstructionText;
+HWND hButtonToggle, hStatusText, hIssueLink, hInstructions;
 BOOL isKeymapActive = FALSE;
 
-// Opens the issue report page
+HBRUSH hBackgroundBrush, hButtonBrush;
+HFONT hSmallFont;
+
+// Open the issue report page
 void OpenIssuePage()
 {
     ShellExecuteW(NULL, L"open", ISSUE_REPORT_URL, NULL, NULL, SW_SHOWNORMAL);
 }
 
-// Updates the UI to reflect the current key mapping status
+// Update UI text
 void UpdateUI()
 {
     SetWindowTextW(hButtonToggle, isKeymapActive ? L"Turn Keymap Off" : L"Turn Keymap On");
     SetWindowTextW(hStatusText, isKeymapActive ? L"Status: ON" : L"Status: OFF");
 }
 
-// Handles UI events
+// Center X calculation
+int CenterX(int parentWidth, int controlWidth)
+{
+    return (parentWidth - controlWidth) / 2;
+}
+
+// Window procedure
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
     {
     case WM_CREATE:
     {
-        HINSTANCE hInst = (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE);
+        hBackgroundBrush = CreateSolidBrush(RGB(24, 44, 85));
+        hButtonBrush = CreateSolidBrush(RGB(40, 60, 100));
 
-        int centerX = 125;      // (450 - 200) / 2
-        int narrowCenterX = 75; // (450 - 300) / 2
+        LOGFONT lf = {0};
+        lf.lfHeight = -14;
+        wcscpy(lf.lfFaceName, L"Consolas");
+        hSmallFont = CreateFontIndirectW(&lf);
 
-        // Status display (centered text)
-        hStatusText = CreateWindowW(L"STATIC", L"Status: OFF", WS_VISIBLE | WS_CHILD | SS_CENTER,
-                                    centerX, 20, 200, 20, hwnd, NULL, hInst, NULL);
+        RECT rc;
+        GetClientRect(hwnd, &rc);
 
-        // Toggle keymap button
-        hButtonToggle = CreateWindowW(L"BUTTON", L"Turn Keymap On", WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
-                                      centerX, 50, 200, 30, hwnd, (HMENU)ID_BUTTON_TOGGLE, hInst, NULL);
+        hStatusText = CreateWindowW(L"STATIC", L"Status: OFF",
+                                    WS_VISIBLE | WS_CHILD | SS_CENTER,
+                                    CenterX(rc.right, 200), 20, 200, 20,
+                                    hwnd, NULL, (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), NULL);
 
-        // Instruction (centered placement, fixed-width font)
-        hInstructionText = CreateWindowW(
-            L"STATIC",
-            L"Key Combo              | Output\n"
-            L"-----------------------+--------\n"
-            L"Ctrl + Alt + (Shift)+A | ä / Ä\n"
-            L"Ctrl + Alt + (Shift)+O | ö / Ö\n"
-            L"Ctrl + Alt + (Shift)+U | ü / Ü\n"
-            L"Ctrl + Alt + (Shift)+S | ß / ẞ\n"
-            L"Ctrl + Alt + [         | „\n"
-            L"Ctrl + Alt + ]         | “",
-            WS_VISIBLE | WS_CHILD | SS_LEFT,
-            narrowCenterX, 90, 300, 130, hwnd, NULL, hInst, NULL);
+        hButtonToggle = CreateWindowW(L"BUTTON", L"Turn Keymap On",
+                                      WS_VISIBLE | WS_CHILD | BS_OWNERDRAW,
+                                      CenterX(rc.right, 200), 50, 200, 30,
+                                      hwnd, (HMENU)ID_BUTTON_TOGGLE,
+                                      (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), NULL);
 
-        HFONT hMonoFont = CreateFontW(
-            16, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
-            DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-            DEFAULT_QUALITY, FIXED_PITCH | FF_MODERN, L"Consolas");
-        SendMessageW(hInstructionText, WM_SETFONT, (WPARAM)hMonoFont, TRUE);
+        const wchar_t *instructionText =
+            L"|  Key Combo                   |  Output   |\n"
+            L"|------------------------------+-----------|\n"
+            L"|  Ctrl + Alt + (Shift) + A    |  ä / Ä    |\n"
+            L"|  Ctrl + Alt + (Shift) + O    |  ö / Ö    |\n"
+            L"|  Ctrl + Alt + (Shift) + U    |  ü / Ü    |\n"
+            L"|  Ctrl + Alt + (Shift) + S    |  ß / ẞ    |\n"
+            L"|  Ctrl + Alt + [              |  „        |\n"
+            L"|  Ctrl + Alt + ]              |  “        |";
 
-        // Issue link (centered text)
-        hIssueLink = CreateWindowW(L"STATIC", L"🔗 Report an issue", WS_VISIBLE | WS_CHILD | SS_NOTIFY | SS_CENTER,
-                                   centerX, 230, 200, 20, hwnd, (HMENU)ID_LINK_ISSUE, hInst, NULL);
+        hInstructions = CreateWindowW(L"STATIC", instructionText,
+                                      WS_VISIBLE | WS_CHILD | SS_LEFT,
+                                      CenterX(rc.right, 360), 95, 360, 140,
+                                      hwnd, NULL, (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), NULL);
 
-        SendMessageW(hIssueLink, WM_SETFONT, (WPARAM)GetStockObject(DEFAULT_GUI_FONT), TRUE);
-        SetTextColor(GetDC(hIssueLink), RGB(0, 0, 255));
+        hIssueLink = CreateWindowW(L"STATIC", L"🔗 Report an issue",
+                                   WS_VISIBLE | WS_CHILD | SS_NOTIFY | SS_CENTER,
+                                   CenterX(rc.right, 200), 245, 200, 20,
+                                   hwnd, (HMENU)ID_LINK_ISSUE,
+                                   (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), NULL);
+
+        HFONT defaultFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
+        SendMessageW(hStatusText, WM_SETFONT, (WPARAM)defaultFont, TRUE);
+        SendMessageW(hButtonToggle, WM_SETFONT, (WPARAM)defaultFont, TRUE);
+        SendMessageW(hInstructions, WM_SETFONT, (WPARAM)hSmallFont, TRUE);
+        SendMessageW(hIssueLink, WM_SETFONT, (WPARAM)defaultFont, TRUE);
         break;
+    }
+
+    case WM_DRAWITEM:
+    {
+        LPDRAWITEMSTRUCT lpDraw = (LPDRAWITEMSTRUCT)lParam;
+        SetBkColor(lpDraw->hDC, RGB(40, 60, 100));
+        SetTextColor(lpDraw->hDC, RGB(220, 220, 220));
+        FillRect(lpDraw->hDC, &lpDraw->rcItem, hButtonBrush);
+        DrawTextW(lpDraw->hDC, L"Turn Keymap On", -1, &lpDraw->rcItem,
+                  DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+        return TRUE;
     }
 
     case WM_COMMAND:
@@ -77,12 +106,22 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 StartKeymap();
             isKeymapActive = !isKeymapActive;
             UpdateUI();
+            InvalidateRect(hButtonToggle, NULL, TRUE); // redraw
             break;
         case ID_LINK_ISSUE:
             OpenIssuePage();
             break;
         }
         break;
+
+    case WM_CTLCOLORSTATIC:
+    case WM_CTLCOLORBTN:
+    {
+        HDC hdc = (HDC)wParam;
+        SetTextColor(hdc, RGB(220, 220, 220));
+        SetBkMode(hdc, TRANSPARENT);
+        return (INT_PTR)hBackgroundBrush;
+    }
 
     case WM_CLOSE:
         StopKeymap();
@@ -93,27 +132,37 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         PostQuitMessage(0);
         break;
 
+    case WM_PAINT:
+    {
+        PAINTSTRUCT ps;
+        HDC hdc = BeginPaint(hwnd, &ps);
+        FillRect(hdc, &ps.rcPaint, hBackgroundBrush);
+        EndPaint(hwnd, &ps);
+        break;
+    }
+
     default:
         return DefWindowProcW(hwnd, uMsg, wParam, lParam);
     }
+
     return 0;
 }
 
-// Initializes the main window and enters message loop
+// Entry point
 void InitGUI(HINSTANCE hInstance, int nCmdShow)
 {
+    hBackgroundBrush = CreateSolidBrush(RGB(24, 44, 85));
     WNDCLASSW wc = {0};
     wc.lpfnWndProc = WindowProc;
     wc.hInstance = hInstance;
+    wc.hbrBackground = NULL;
     wc.lpszClassName = L"KeymapGUI";
-    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1); // optional: use COLOR_BTNFACE for gray
 
     RegisterClassW(&wc);
 
     HWND hwnd = CreateWindowExW(0, L"KeymapGUI", L"Keymap Utility",
-                                WS_OVERLAPPEDWINDOW & ~WS_MAXIMIZEBOX & ~WS_THICKFRAME,
-                                CW_USEDEFAULT, CW_USEDEFAULT, 450, 320,
-                                NULL, NULL, hInstance, NULL);
+                                WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
+                                460, 340, NULL, NULL, hInstance, NULL);
 
     if (!hwnd)
         return;
