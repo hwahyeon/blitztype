@@ -39,6 +39,8 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
                 case 'O': HandleUmlaut(L'ö', L'Ö'); return 1;
                 case 'U': HandleUmlaut(L'ü', L'Ü'); return 1;
                 case 'S': HandleUmlaut(L'ß', L'ẞ'); return 1;
+                case VK_OEM_4: HandleUmlaut(L'„', L'„'); return 1; // Ctrl+Alt+[ → „
+                case VK_OEM_6: HandleUmlaut(L'“', L'“'); return 1; // Ctrl+Alt+] → “
             }
         }
     }
