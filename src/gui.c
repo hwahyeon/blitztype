@@ -160,7 +160,7 @@ void InitGUI(HINSTANCE hInstance, int nCmdShow)
 
     RegisterClassW(&wc);
 
-    HWND hwnd = CreateWindowExW(0, L"KeymapGUI", L"Keymap Utility",
+    HWND hwnd = CreateWindowExW(0, L"KeymapGUI", L"Quick Umlaut",
                                 WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
                                 460, 340, NULL, NULL, hInstance, NULL);
 
